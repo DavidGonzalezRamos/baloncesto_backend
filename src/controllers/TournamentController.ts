@@ -25,7 +25,7 @@ export class TournamentController {
   static getTournamentById = async (req: Request, res: Response): Promise<void> => {
     const {id} = req.params
     try {
-      const tournament = await Tournament.findById(id)
+      const tournament = await Tournament.findById(id).populate('teams')
       if (!tournament) {
         res.status(404).json({ message: 'Torneo no encontrado' });
         return;
@@ -39,13 +39,15 @@ export class TournamentController {
   static updateTournament = async (req: Request, res: Response) => {
     const {id} = req.params
    try {
-    const tournament = await Tournament.findByIdAndUpdate(id, req.body)
+    const tournament = await Tournament.findById(id)
 
       if (!tournament) {
         res.status(404).json({ message: 'Torneo no encontrado' });
         return;
       }
-
+      tournament.dateStart = req.body.dateStart
+      tournament.dateEnd = req.body.dateEnd
+      tournament.tournamentName = req.body.tournamentName
       await tournament.save()
       res.send('Torneo actualizado correctamente')
     } catch (error) {
