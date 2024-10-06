@@ -45,6 +45,7 @@ export class TeamController {
       }
       req.team.nameTeam = req.body.nameTeam
       req.team.nameCoach = req.body.nameCoach
+      req.team.branchTeam = req.body.branchTeam
       await req.team.save()
       res.send('Equipo actualizado')
     } catch (error) {

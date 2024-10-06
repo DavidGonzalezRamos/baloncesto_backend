@@ -58,6 +58,8 @@ router.post('/:tournamentId/teams',
     .notEmpty().withMessage('El nombre del equipo es requerido'),
   body('nameCoach')
     .notEmpty().withMessage('El nombre del coach es requerido'),
+  body('branchTeam')
+    .notEmpty().withMessage('La rama del equipo es requerida'),
 
   handleInputErrors,
   TeamController.createTeam

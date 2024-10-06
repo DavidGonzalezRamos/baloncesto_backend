@@ -14,7 +14,7 @@ try {
   const {teamId} = req.params;
     const team = await Team.findById(teamId);
     if (!team) {
-      res.status(404).json({ message: 'Tarea no encontrado' });
+      res.status(404).json({ message: 'Equipo no encontrado' });
       return;
     }
     req.team = team;

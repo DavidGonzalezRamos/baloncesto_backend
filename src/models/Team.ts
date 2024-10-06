@@ -3,11 +3,13 @@ import mongoose, {Schema, Document, Types} from "mongoose";
 export interface ITeam extends Document  {
   nameTeam: string
   nameCoach: string
+  branchTeam: string
   tournament: Types.ObjectId
 }
 
 export const TeamSchema: Schema = new Schema({
-  nameTeam: { type: String, required: true, trim: true, unique: true },
+  nameTeam: { type: String, required: true, trim: true},
+  branchTeam: { type: String, required: true, trim: true },
   nameCoach: { type: String, required: true, trim: true },
   tournament: {
     type: Types.ObjectId,
