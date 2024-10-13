@@ -28,4 +28,26 @@ export class AuthEmail {
 
     console.log('Email enviado', info.messageId)
   }
+
+
+  static sendPasswordResetToken = async (user: IEmail) => {
+    // Send email
+    const info = await transporter.sendMail({
+     from: 'Baloncesto <admin@baloncesto.com>',
+     to: user.email,
+     subject: 'Reestable tu contraseña',
+     text: 'Baloncesto IPN - Reestablece tu contraseña',
+     html: `
+       <h1>Bienvenido a Baloncesto IPN</h1>
+       <p>Hola mi estimado: ${user.name}, has solicitado reestablecer tu password</p>
+       <p>Para confirmar tu cuenta, da click en el siguiente enlace:</p>
+       <a href="${process.env.FRONTEND_URL}/auth/new-password">Reestablecer Password</a>
+       <p>E ingresando el siguiente codigo: <b>${user.token}</b></p>
+       <p>Este codigo expirará en 10 minutos</p>
+       `
+
+   })
+
+   console.log('Email enviado', info.messageId)
+ }
 }

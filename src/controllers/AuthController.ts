@@ -142,5 +142,72 @@ export class AuthController {
       res.status(500).json({error: 'Error en el servidor'});
     }
   }
+
+  static forgotPassword = async (req: Request, res: Response) => {
+    try {
+      const {email} = req.body
+
+      //Usuario existe
+      const user = await User.findOne({email})
+      if(!user){
+        const error = new Error('El usuario no está registrado');
+        res.status(404).json({error: error.message});
+        return 
+      }
+
+      // Generate token
+      const token = new Token()
+      token.token = generateToken()
+      token.user = user.id
+      await token.save()
+
+      // Send email
+      AuthEmail.sendPasswordResetToken({
+        email: user.email,
+        name: user.name,
+        token: token.token
+      })
+
+      res.send('Revisa tu email para ver las instrucciones');
+    } catch (error) {
+      res.status(500).json({error: 'Error en el servidor'});
+    }
+  }
+
+  static validateToken = async (req: Request, res: Response) => {
+    try {
+      const {token} = req.body
+
+      const tokenExists = await Token.findOne({token})
+      if(!tokenExists){
+        const error = new Error('Token no válido');
+        res.status(404).json({error: error.message});
+        return 
+      }
+      res.send('Token Valido, Define tu nuevo Password');
+    } catch (error) {
+      res.status(500).json({error: 'Error en el servidor'});
+    }
+  }
+
+  static updatePasswordWithToken = async (req: Request, res: Response) => {
+    try {
+      const {token} = req.params
+
+      const tokenExists = await Token.findOne({token})
+      if(!tokenExists){
+        const error = new Error('Token no válido');
+        res.status(404).json({error: error.message});
+        return 
+      }
+      const user = await User.findById(tokenExists.user)
+      user.password = await hashPassword(req.body.password)
+
+      await Promise.allSettled([user.save(), tokenExists.deleteOne()])
+      res.send('El password ha sido actualizado');
+    } catch (error) {
+      res.status(500).json({error: 'Error en el servidor'});
+    }
+  }
     
 }
