@@ -19,7 +19,7 @@ export class AuthEmail {
         <h1>Bienvenido a Baloncesto IPN</h1>
         <p>Hola mi estimado: ${user.name}, has creado tu cuenta, solo confirma tu cuenta</p>
         <p>Para confirmar tu cuenta, da click en el siguiente enlace:</p>
-        <a href="">Confirmar cuenta</a>
+        <a href="${process.env.FRONTEND_URL}/auth/confirm-account">Confirmar cuenta</a>
         <p>E ingresando el siguiente codigo: <b>${user.token}</b></p>
         <p>Este codigo expirará en 10 minutos</p>
         `
