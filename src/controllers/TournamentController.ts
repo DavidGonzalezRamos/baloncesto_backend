@@ -5,6 +5,9 @@ export class TournamentController {
 
   static createTournament = async (req: Request, res: Response) => {
     const tournamnet = new Tournament(req.body)
+
+    //Asignar admin
+    tournamnet.admin = req.user.id
     try {
       await tournamnet.save()
       res.send('Torneo creado correctamente')
@@ -45,6 +48,13 @@ export class TournamentController {
         res.status(404).json({ message: 'Torneo no encontrado' });
         return;
       }
+
+      if(tournament.admin.toString() !== req.user.id){
+        const error = new Error('No autorizado')
+        res.status(404).json({error: error.message})
+        return
+      }
+
       tournament.dateStart = req.body.dateStart
       tournament.dateEnd = req.body.dateEnd
       tournament.tournamentName = req.body.tournamentName
@@ -63,6 +73,12 @@ export class TournamentController {
       if (!tournament) {
         res.status(404).json({ message: 'Torneo no encontrado' });
         return;
+      }
+
+      if(tournament.admin.toString() !== req.user.id){
+        const error = new Error('No autorizado')
+        res.status(404).json({error: error.message})
+        return
       }
       
       await tournament.deleteOne()

@@ -5,10 +5,12 @@ import { handleInputErrors } from '../middleware/validation';
 import { TeamController } from '../controllers/TeamController';
 import { validateTournamentExists } from '../middleware/tournament';
 import { validateTeamExists } from '../middleware/team';
+import { authenticate } from '../middleware/auth';
 
 const router = Router();
 
-router.post('/', 
+router.post('/',
+  authenticate, 
   body('dateStart')
   .isDate().notEmpty().withMessage('La fecha de inicio es requerida'),
   
@@ -22,15 +24,19 @@ router.post('/',
   TournamentController.createTournament
 );
 
-router.get('/', TournamentController.getAllTournaments);
+router.get('/', 
+  authenticate,
+  TournamentController.getAllTournaments);
 
 router.get('/:id',
+  authenticate,
   param('id').isMongoId().withMessage('El id no es valido'),  
   handleInputErrors, 
   TournamentController.getTournamentById
 );
 
 router.put('/:id',
+  authenticate,
   param('id').isMongoId().withMessage('El id no es valido'),  
   body('dateStart')
     .isDate().notEmpty().withMessage('La fecha de inicio es requerida'),
@@ -45,15 +51,18 @@ router.put('/:id',
 )
 
 router.delete('/:id',
+  authenticate,
   param('id').isMongoId().withMessage('El id no es valido'),  
   handleInputErrors, 
   TournamentController.deleteTournament
 )
 
 // Routes for Teams
-router.param('tournamentId', validateTournamentExists)
+router.param('tournamentId', 
+  validateTournamentExists)
 
 router.post('/:tournamentId/teams',
+  authenticate,
    body('nameTeam')
     .notEmpty().withMessage('El nombre del equipo es requerido'),
   body('nameCoach')
@@ -66,17 +75,20 @@ router.post('/:tournamentId/teams',
 )
 
 router.get('/:tournamentId/teams',
+  authenticate,
   TeamController.getTournamentsTeams
 )
 
 router.param('teamId', validateTeamExists)
 router.get('/:tournamentId/teams/:teamId',
+  authenticate,
   param('teamId').isMongoId().withMessage('El id no es valido'),  
   handleInputErrors,
   TeamController.getTeamById
 )
 
 router.put('/:tournamentId/teams/:teamId',
+  authenticate,
   param('teamId').isMongoId().withMessage('El id no es valido'),  
   body('nameTeam')
     .notEmpty().withMessage('El nombre del equipo es requerido'),
@@ -88,6 +100,7 @@ router.put('/:tournamentId/teams/:teamId',
 )
 
 router.delete('/:tournamentId/teams/:teamId',
+  authenticate,
   param('teamId').isMongoId().withMessage('El id no es valido'),  
   handleInputErrors,
   TeamController.deleteTeam
