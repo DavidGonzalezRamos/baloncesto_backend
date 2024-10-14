@@ -7,7 +7,7 @@ export interface ITournament extends Document  {
   dateEnd: Date
   tournamentName: string
   teams: PopulatedDoc<ITeam & Document>[]
-  admin: PopulatedDoc<IUser & Document>
+  role: PopulatedDoc<IUser & Document>
 }
 
 const TournamentSchema: Schema = new Schema({
@@ -15,7 +15,7 @@ const TournamentSchema: Schema = new Schema({
   dateEnd: { type: Date, required: true, trim: true  },
   tournamentName: { type: String, required: true, trim: true, unique: true },
   teams: [{ type: Types.ObjectId, ref: 'Team' }],
-  admin: { type: Types.ObjectId, ref: 'User' }
+  role: { type: Types.ObjectId, ref: 'User' },
 }, {timestamps: true})
 
 const Tournament = mongoose.model<ITournament>('Tournament', TournamentSchema)

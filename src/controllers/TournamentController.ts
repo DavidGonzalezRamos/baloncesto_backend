@@ -1,90 +1,98 @@
-import type { Request, Response } from 'express'
-import Tournament from '../models/Tournament'
+import type { Request, Response } from 'express';
+import Tournament from '../models/Tournament';
 
 export class TournamentController {
 
   static createTournament = async (req: Request, res: Response) => {
-    const tournamnet = new Tournament(req.body)
-
-    //Asignar admin
-    tournamnet.admin = req.user.id
     try {
-      await tournamnet.save()
-      res.send('Torneo creado correctamente')
+      const tournament = new Tournament(req.body);
+
+      // Asignar role desde el token del usuario autenticado
+      tournament.role = req.user.id;
+
+      await tournament.save();
+      res.status(201).send('Torneo creado correctamente');
     } catch (error) {
-      console.log(error)
+      console.error(error);
+      res.status(500).json({ error: 'Error al crear el torneo' });
     }
   }
 
-  static getAllTournaments= async (req: Request, res: Response) => {
+  static getAllTournaments = async (req: Request, res: Response) => {
     try {
-      const tournaments = await Tournament.find({})
-      res.json(tournaments)
+      const tournaments = await Tournament.find({});
+      res.json(tournaments);
     } catch (error) {
-      console.log(error)
+      console.error(error);
+      res.status(500).json({ error: 'Error al obtener los torneos' });
     }
   }
 
   static getTournamentById = async (req: Request, res: Response): Promise<void> => {
-    const {id} = req.params
+    const { id } = req.params;
     try {
-      const tournament = await Tournament.findById(id).populate('teams')
+      const tournament = await Tournament.findById(id).populate('teams');
       if (!tournament) {
         res.status(404).json({ message: 'Torneo no encontrado' });
         return;
       }
-      res.json(tournament)
+      res.json(tournament);
     } catch (error) {
-      console.log(error)
+      console.error(error);
+      res.status(500).json({ error: 'Error al obtener el torneo' });
     }
   }
 
   static updateTournament = async (req: Request, res: Response) => {
-    const {id} = req.params
-   try {
-    const tournament = await Tournament.findById(id)
+    const { id } = req.params;
+    try {
+      const tournament = await Tournament.findById(id);
 
       if (!tournament) {
         res.status(404).json({ message: 'Torneo no encontrado' });
         return;
       }
 
-      if(tournament.admin.toString() !== req.user.id){
-        const error = new Error('No autorizado')
-        res.status(404).json({error: error.message})
-        return
+      // Verificar que el usuario sea el administrador del torneo
+      if (tournament.role.toString() !== req.user.id) {
+        res.status(403).json({ error: 'No autorizado' });
+        return;
       }
 
-      tournament.dateStart = req.body.dateStart
-      tournament.dateEnd = req.body.dateEnd
-      tournament.tournamentName = req.body.tournamentName
-      await tournament.save()
-      res.send('Torneo actualizado correctamente')
+      // Actualizar datos del torneo
+      tournament.dateStart = req.body.dateStart || tournament.dateStart;
+      tournament.dateEnd = req.body.dateEnd || tournament.dateEnd;
+      tournament.tournamentName = req.body.tournamentName || tournament.tournamentName;
+
+      await tournament.save();
+      res.send('Torneo actualizado correctamente');
     } catch (error) {
-      console.log(error)
+      console.error(error);
+      res.status(500).json({ error: 'Error al actualizar el torneo' });
     }
   }
 
   static deleteTournament = async (req: Request, res: Response) => {
-    const {id} = req.params
+    const { id } = req.params;
     try {
-      const tournament = await Tournament.findById(id)
+      const tournament = await Tournament.findById(id);
 
       if (!tournament) {
         res.status(404).json({ message: 'Torneo no encontrado' });
         return;
       }
 
-      if(tournament.admin.toString() !== req.user.id){
-        const error = new Error('No autorizado')
-        res.status(404).json({error: error.message})
-        return
+      // Verificar que el usuario sea el administrador del torneo
+      if (tournament.role.toString() !== req.user.id) {
+        res.status(403).json({ error: 'No autorizado' });
+        return;
       }
-      
-      await tournament.deleteOne()
-      res.send('Torneo eliminado correctamente')
+
+      await tournament.deleteOne();
+      res.send('Torneo eliminado correctamente');
     } catch (error) {
-      console.log(error)
+      console.error(error);
+      res.status(500).json({ error: 'Error al eliminar el torneo' });
     }
   }
 }

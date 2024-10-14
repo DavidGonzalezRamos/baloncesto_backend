@@ -60,7 +60,7 @@ router.post('/validate-token',
   AuthController.validateToken
 )
 
-router.post('/validate-token/:token',
+router.post('/update-password/:token',
   param('token').isNumeric().withMessage('El token no es válido'),
   body('password')
     .isLength({ min: 8 }).withMessage('La contraseña debe tener al menos 8 caracteres'),
@@ -77,6 +77,12 @@ router.post('/validate-token/:token',
 router.get('/user',
   authenticate,
   AuthController.user
+)
+
+// Ruta para cambiar el rol de usuario
+router.post('/change-role', 
+  authenticate, 
+  AuthController.changeUserRole
 )
 
 

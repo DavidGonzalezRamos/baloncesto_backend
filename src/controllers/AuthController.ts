@@ -9,39 +9,43 @@ export class AuthController {
 
   static createAccount = async (req: Request, res: Response) => {
     try {
-      const {password, email} = req.body
-
-      //Prevenir duplicados
-      const userExists = await User.findOne({email})
-      if(userExists){
+      const { password, email, role } = req.body;
+  
+      // Prevenir duplicados
+      const userExists = await User.findOne({ email });
+      if (userExists) {
         const error = new Error('El usuario ya está registrado');
-        res.status(409).json({error: error.message});
-        return 
+        res.status(409).json({ error: error.message });
+        return;
       }
-
-      const user = new User(req.body);
-
+  
+      const user = new User({
+        ...req.body,
+        role: role || 'viewer'  // Asigna un rol o el rol predeterminado "viewer"
+      });
+  
       // Hash password
       user.password = await hashPassword(password);
-
+  
       // Generate token
-      const token = new Token()
-      token.token = generateToken()
-      token.user = user.id
-
+      const token = new Token();
+      token.token = generateToken();
+      token.user = user.id;
+  
       // Send email
       AuthEmail.sendConfirmationEmail({
         email: user.email,
         name: user.name,
         token: token.token
-      })
-
-      await Promise.allSettled([user.save(), token.save()])
+      });
+  
+      await Promise.allSettled([user.save(), token.save()]);
       res.send('Cuenta creada, revisa tu email para confirmar tu cuenta');
     } catch (error) {
-      res.status(500).json({error: 'Error en el servidor'});
+      res.status(500).json({ error: 'Error en el servidor' });
     }
-  }
+  };
+  
 
   static confirmAccount = async (req: Request, res: Response) => {
     try {
@@ -66,49 +70,53 @@ export class AuthController {
 
   static login = async (req: Request, res: Response) => {
     try {
-      const {email, password} = req.body
-
-      const user = await User.findOne({email})
-      if(!user){
+      const { email, password } = req.body;
+  
+      const user = await User.findOne({ email });
+      if (!user) {
         const error = new Error('Usuario no encontrado');
-        res.status(404).json({error: error.message});
-        return 
+        res.status(404).json({ error: error.message });
+        return;
       }
+  
+      if (!user.confirmed) {
+        // Generar token 
+        const token = new Token();
+        token.user = user.id;
+        token.token = generateToken();
+        await token.save();
 
-      if(!user.confirmed){
-        const token = new Token()
-        token.user = user.id
-        token.token = generateToken()
-        token.save()
-
-      // Send email
-      AuthEmail.sendConfirmationEmail({
+        // Send email
+        AuthEmail.sendConfirmationEmail({
         email: user.email,
         name: user.name,
         token: token.token
       })
-
+  
         const error = new Error('Usuario no confirmado, hemos enviado un email de confirmación');
-        res.status(401).json({error: error.message});
-        return 
+        res.status(401).json({ error: error.message });
+        return;
       }
-
-      // Validate password
-      const isPasswordCorrect = await checkPassword(password, user.password)
-      if(!isPasswordCorrect){
+  
+      // Validar contraseña
+      const isPasswordCorrect = await checkPassword(password, user.password);
+      if (!isPasswordCorrect) {
         const error = new Error('Contraseña incorrecta');
-        res.status(401).json({error: error.message});
-        return 
+        res.status(401).json({ error: error.message });
+        return;
       }
-
-      const token = generateJWT({id: user.id})
-
+  
+      const token = generateJWT({ id: user.id });
+  
       res.send(token);
     } catch (error) {
-      res.status(500).json({error: 'Error en el servidor'});
-
+     // console.error(error); // Log de error para ayudar a la depuración
+      res.status(500).json({ error: 'Error en el servidor' });
+      return
     }
-  }
+  };
+  
+  
 
   static requestConfirmationCode = async (req: Request, res: Response) => {
     try {
@@ -215,7 +223,42 @@ export class AuthController {
   }
     
   static user = async (req: Request, res: Response) => {
-    res.json(req.user)
-    return 
-  }
+    const { _id, name, email, role } = req.user;
+    res.json({ _id, name, email, role }); // Incluye el rol en la respuesta
+    return
+  };
+
+  static changeUserRole = async (req: Request, res: Response) => {
+    const { email, newRole } = req.body; // newRole debe ser 'admin' o 'viewer'
+    try {
+      // Verificar si el usuario autenticado es un admin
+      if (req.user.role !== 'admin') {
+        res.status(403).json({ error: 'No autorizado para realizar esta acción' });
+        return 
+      }
+
+      // Buscar al usuario por su email
+      const user = await User.findOne({ email });
+      if (!user) {
+        res.status(404).json({ error: 'Usuario no encontrado' });
+        return 
+      }
+
+      // Verificar que el nuevo rol sea válido
+      if (!['admin', 'viewer'].includes(newRole)) {
+        res.status(400).json({ error: 'Rol no válido' });
+        return 
+      }
+
+      // Actualizar el rol
+      user.role = newRole;
+      await user.save();
+
+      res.json({ message: `Rol actualizado a ${newRole} exitosamente` });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Error al cambiar el rol' });
+      return
+    }
+  };
 }
