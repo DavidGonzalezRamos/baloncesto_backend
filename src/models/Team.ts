@@ -1,10 +1,12 @@
-import mongoose, {Schema, Document, Types} from "mongoose";
+import mongoose, {Schema, Document, Types, PopulatedDoc} from "mongoose";
+import { IPLayer } from "./Player";
 
 export interface ITeam extends Document  {
   nameTeam: string
   nameCoach: string
   branchTeam: string
   tournament: Types.ObjectId
+  players: PopulatedDoc<IPLayer & Document>[]
 }
 
 export const TeamSchema: Schema = new Schema({
@@ -14,7 +16,8 @@ export const TeamSchema: Schema = new Schema({
   tournament: {
     type: Types.ObjectId,
     ref: 'Tournament',
-  }
+  },
+  players: [{ type: Types.ObjectId, ref: 'Player' }]
 }, {timestamps: true}) 
 
 const Team = mongoose.model<ITeam>('Team', TeamSchema)
