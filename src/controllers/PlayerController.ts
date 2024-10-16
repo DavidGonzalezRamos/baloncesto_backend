@@ -44,7 +44,8 @@ export class PlayerController{
       }
       req.player.name= req.body.name
       req.player.lastName= req.body.lastName
-      req.player.birthDate= req.body.birthDate  
+      req.player.number= req.body.number
+      req.player.curp= req.body.curp  
       req.player.position= req.body.position
       await req.player.save()
       res.send('Jugador actualizado')

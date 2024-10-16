@@ -18,8 +18,10 @@ router.post('/:teamId/players',
     .notEmpty().withMessage('El nombre del jugador es obligatorio'),
   body('lastName')
     .notEmpty().withMessage('El apellido del jugador es obligatorio'),
-  body('birthDate')
-    .isDate().notEmpty().withMessage('La fecha de nacimiento es obligatoria'),
+  body('number')
+    .isNumeric().notEmpty().withMessage('El número del jugador es obligatorio'),
+  body('curp')
+    .notEmpty().withMessage('La CURP del jugador es obligatoria'),
   body('position')
     .notEmpty().withMessage('La posición del jugador es obligatoria'),
   
@@ -49,6 +51,8 @@ router.put('/:teamId/players/:playerId',
     .notEmpty().withMessage('El nombre del jugador es obligatorio'),
   body('lastName')
     .notEmpty().withMessage('El apellido del jugador es obligatorio'),
+  body('number')
+    .isNumeric().notEmpty().withMessage('El número del jugador es obligatorio'),
   body('birthDate')
     .isDate().notEmpty().withMessage('La fecha de nacimiento es obligatoria'),
   body('position')

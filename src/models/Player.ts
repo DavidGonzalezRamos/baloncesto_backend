@@ -3,7 +3,8 @@ import mongoose, {Schema, Document, Types} from "mongoose";
 export interface IPLayer extends Document  {
   name: string
   lastName: string
-  birthDate: Date
+  number: number
+  curp: string
   position: string
   team: Types.ObjectId
 }
@@ -11,7 +12,8 @@ export interface IPLayer extends Document  {
 export const PlayerSchema: Schema = new Schema({
   name: { type: String, required: true, trim: true},
   lastName: { type: String, required: true, trim: true },
-  birthDate: { type: Date, required: true, trim: true },
+  number: { type: Number, required: true, trim: true },
+  curp: { type: String, required: true, trim: true, unique: true },
   position: { type: String, required: true, trim: true },
   team: {
     type: Types.ObjectId,
