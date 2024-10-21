@@ -25,15 +25,22 @@ export class TeamController {
     }
   }
 
-  static getTeamById = async (req: Request, res: Response)=> {
+  static getTeamById = async (req: Request, res: Response): Promise<void> => {
+    const { teamId } = req.params;
     try {
-      if(req.team.tournament.toString() !== req.tournament.id) {
-        res.status(404).json({error: 'Accion no permitida'})
-         return
+      if (req.team.tournament.toString() !== req.tournament.id) {
+        res.status(404).json({ error: 'Acción no permitida' });
+        return;
       }
-      res.json(req.team)
+      const team = await Team.findById(teamId).populate('players')
+      if (!team) {
+        res.status(404).json({ error: 'Equipo no encontrado' });
+        return 
+      }
+      res.json(team)
     } catch (error) {
-      res.status(500).json({error: 'Error al obtener el equipo'})
+      console.error(error);
+      res.status(500).json({ error: 'Error al obtener el equipo' });
     }
   }
 
