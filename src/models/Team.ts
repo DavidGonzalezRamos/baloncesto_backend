@@ -10,7 +10,7 @@ export interface ITeam extends Document  {
 }
 
 export const TeamSchema: Schema = new Schema({
-  nameTeam: { type: String, required: true, trim: true},
+  nameTeam: { type: String, required: true, trim: true, unique: true },
   branchTeam: { type: String, required: true, trim: true },
   nameCoach: { type: String, required: true, trim: true },
   tournament: {

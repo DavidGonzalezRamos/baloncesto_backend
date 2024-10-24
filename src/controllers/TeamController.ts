@@ -6,6 +6,19 @@ export class TeamController {
 
   static createTeam = async (req: Request, res: Response)=> {
     try {
+      const { nameTeam } = req.body;
+
+      // Verifica si el equipo ya existe en el torneo por su nombre
+      const existingTeam = await Team.findOne({
+          nameTeam,
+          tournament: req.tournament.id,
+      });
+
+      // Si el equipo ya existe, devuelve un error
+      if (existingTeam) {
+          res.status(400).json({ error: 'El equipo ya existe en este torneo' });
+          return;
+      }
       const team = new Team(req.body)
       team.tournament = req.tournament.id
       req.tournament.teams.push(team.id)
@@ -56,7 +69,7 @@ export class TeamController {
       await req.team.save()
       res.send('Equipo actualizado')
     } catch (error) {
-      res.status(500).json({error: 'Error al obtener el equipo'})
+      res.status(500).json({error: 'Error al actualizar el equipo'})
     }
   }
 

@@ -51,6 +51,13 @@ export class PlayerController{
 
   static updatePlayer = async (req: Request, res: Response) => {
     try {
+      const existingPlayer = await Player.findOne({ curp: req.body.curp });
+      
+      if (existingPlayer) {
+        res.status(400).json({ error: 'El CURP ya está en uso por otro jugador' });
+        return 
+      }
+      
       if(req.player.team.toString() !== req.team.id) {
         res.status(404).json({error: 'Accion no permitida'})
          return
