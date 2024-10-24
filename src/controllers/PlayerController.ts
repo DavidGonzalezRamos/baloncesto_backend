@@ -4,16 +4,29 @@ import Player from "../models/Player";
 export class PlayerController{
 
   static createPlayer = async (req: Request, res: Response) => {
-      try {
-        const player= new Player(req.body)
-        player.team = req.team.id
-        req.team.players.push(player.id)
-        await Promise.allSettled([player.save(), req.team.save()])
-        res.send('Jugador creado')
-      } catch (error) {
-        res.status(500).json({error: 'Error al crear el jugador'})
+    try {
+      const existingPlayer = await Player.findOne({ curp: req.body.curp });
+      
+      if (existingPlayer) {
+        res.status(400).json({ error: 'El CURP ya está en uso por otro jugador' });
+        return 
       }
+  
+      // Si no existe, proceder a crear el jugador
+      const player = new Player(req.body);
+      player.team = req.team.id;
+  
+      // Asociar el jugador al equipo y guardar ambos
+      req.team.players.push(player.id);
+      await Promise.allSettled([player.save(), req.team.save()]);
+  
+      res.send('Jugador creado');
+    } catch (error) {
+      // Manejo de errores genéricos
+      res.status(500).json({ error: 'Error al crear el jugador' });
+    }
   }
+  
 
   static getTeamsPlayers = async (req: Request, res: Response) => {
     try {
