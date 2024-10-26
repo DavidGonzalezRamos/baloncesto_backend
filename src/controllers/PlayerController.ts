@@ -53,7 +53,7 @@ export class PlayerController{
     try {
       const existingPlayer = await Player.findOne({ curp: req.body.curp });
       
-      if (existingPlayer) {
+      if (existingPlayer && existingPlayer.id.toString() !== req.player.id.toString()) {
         res.status(400).json({ error: 'El CURP ya está en uso por otro jugador' });
         return 
       }
