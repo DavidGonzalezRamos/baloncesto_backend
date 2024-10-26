@@ -85,5 +85,33 @@ router.post('/change-role',
   AuthController.changeUserRole
 )
 
+// Profile
+router.put('/profile',
+  authenticate,
+  body('name')
+    .notEmpty().withMessage('El nombre de usuario es obligatorio'),
+  body('email')
+    .isEmail().withMessage('El email no es válido'),
+  handleInputErrors,
+  AuthController.updateProfile
+)
+
+router.post('/update-password',
+  authenticate,
+  body('old_password')
+    .notEmpty().withMessage('La contraseña actual es obligatoria'),
+  body('password')
+    .isLength({ min: 8 }).withMessage('La contraseña debe tener al menos 8 caracteres'),
+  body('password_confirmation').custom((value, {req})=>{
+    if(value !== req.body.password){
+      throw new Error('Las contraseñas no coinciden');
+    }
+    return true;
+  }),
+  handleInputErrors,
+  AuthController.updateCurrentUserPassword
+)
+
+
 
 export default router;
