@@ -113,5 +113,13 @@ router.post('/update-password',
 )
 
 
+router.post('/check-password',
+  authenticate,
+  body('password')
+    .notEmpty().withMessage('La contraseña es obligatoria'),
+  handleInputErrors,
+  AuthController.checkPassword
+)
+
 
 export default router;
