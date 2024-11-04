@@ -14,7 +14,7 @@ export class TournamentController {
       res.status(201).send('Torneo creado correctamente');
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Error al crear el torneo' });
+      res.status(400).json({ error: 'Error al crear el torneo' });
     }
   }
 
@@ -65,7 +65,7 @@ export class TournamentController {
       tournament.tournamentName = req.body.tournamentName || tournament.tournamentName;
 
       await tournament.save();
-      res.send('Torneo actualizado correctamente');
+      res.status(200).send('Torneo actualizado correctamente');
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: 'Error al actualizar el torneo' });
@@ -89,10 +89,12 @@ export class TournamentController {
       }
 
       await tournament.deleteOne();
-      res.send('Torneo eliminado correctamente');
+      res.status(200).send('Torneo eliminado correctamente');
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Error al eliminar el torneo' });
+      if (!res.headersSent) {
+        res.status(500).json({ error: 'Error al eliminar el torneo' });
+      }
     }
   }
 }

@@ -20,7 +20,7 @@ export class PlayerController{
       req.team.players.push(player.id);
       await Promise.allSettled([player.save(), req.team.save()]);
   
-      res.send('Jugador creado');
+      res.status(201).send('Jugador creado');
     } catch (error) {
       // Manejo de errores genéricos
       res.status(500).json({ error: 'Error al crear el jugador' });
