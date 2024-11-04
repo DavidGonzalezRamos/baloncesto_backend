@@ -6,8 +6,10 @@ import Tournament from "../../models/Tournament";
 
 const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MjdjYzNiZDIxYjVjNmQxNDE2ZWMzNSIsImlhdCI6MTczMDY2MTQ2MiwiZXhwIjoxNzQ2MjEzNDYyfQ.eIIEyryXkKXJXMMjvr3kfVcELkkC0wu9xHSO4eu-rEw"
 const tokenNoValido = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MjdmYjkwMTA5OTU0N2ZkNWJhZDE2ZCIsImlhdCI6MTczMDY4Nzg1NSwiZXhwIjoxNzQ2MjM5ODU1fQ.fqgqp3w3jCZZjv6WaDGkD5nbWhlfRU3viTmvQ9ABIgA"
+let consoleErrorMock: jest.SpyInstance<void, [message?: any, ...optionalParams: any[]]>;
 
 beforeAll(async () => {
+  consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => {});
   await connectDB();
   await Tournament.deleteMany({});
 });
@@ -17,7 +19,9 @@ beforeEach(async () => {
 });
 
 afterAll(async () => {
-  await Tournament.deleteMany({});
+  if (consoleErrorMock) {
+    consoleErrorMock.mockRestore(); // Restaura el comportamiento original de console.error
+  }  await Tournament.deleteMany({});
   await disconnectDB();
 });
 

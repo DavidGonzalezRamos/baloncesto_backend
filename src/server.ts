@@ -15,7 +15,7 @@ const app = express();
 app.use(cors(corsConfig));
 
 //Loggin
-app.use(morgan('dev'));
+//app.use(morgan('dev'));
 
 //Leer datos del formulario
 app.use(express.json());

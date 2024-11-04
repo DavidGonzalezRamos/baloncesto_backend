@@ -31,9 +31,9 @@ export const connectDB = async () => {
     const { connection } = await mongoose.connect(process.env.DATABASE_URL_DOCKER_PRUEBAS);
     isConnected = connection.readyState; // Establecer el estado de conexión
     const url = `${connection.host}:${connection.port}/${connection.name}`;
-    console.log(colors.bgMagenta(`Connected to MongoDB: ${url}`));
+   // console.log(colors.bgMagenta(`Connected to MongoDB: ${url}`));
   } catch (error) {
-    console.log(colors.bgRed(`Error al conectar MongoDB: ${error.message}`));
+    //console.log(colors.bgRed(`Error al conectar MongoDB: ${error.message}`));
     exit(1);
   }
 };
@@ -42,6 +42,6 @@ export const disconnectDB = async () => {
   if (isConnected) {
     await mongoose.disconnect(); // Desconectar de la base de datos
     isConnected = false; // Reiniciar el estado de conexión
-    console.log(colors.bgGreen('Disconnected from MongoDB'));
+    //console.log(colors.bgGreen('Disconnected from MongoDB'));
   }
 };

@@ -23,7 +23,8 @@ export class TeamController {
       team.tournament = req.tournament.id
       req.tournament.teams.push(team.id)
       await Promise.allSettled([team.save(), req.tournament.save()])
-      res.send('Equipo creado')
+      
+      res.status(201).send('Equipo creado')
     } catch (error) {
       res.status(500).json({error: 'Error al crear el equipo'})
     }
