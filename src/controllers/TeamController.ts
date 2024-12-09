@@ -11,6 +11,7 @@ export class TeamController {
       // Verifica si el equipo ya existe en el torneo por su nombre
       const existingTeam = await Team.findOne({
           nameTeam,
+          branchTeam: req.body.branchTeam,
           tournament: req.tournament.id,
       });
 

@@ -1,4 +1,4 @@
-/*import mongoose from "mongoose";
+import mongoose from "mongoose";
 import colors from "colors";
 import { exit } from 'node:process';
 
@@ -14,7 +14,8 @@ export const connectDB = async () => {
     exit(1);
     
   }
-}*/
+}
+/*
 //Configuracion para pruebas
 import mongoose from "mongoose";
 import colors from "colors";
@@ -45,3 +46,4 @@ export const disconnectDB = async () => {
     //console.log(colors.bgGreen('Disconnected from MongoDB'));
   }
 };
+*/

@@ -22,7 +22,7 @@ export const TeamSchema: Schema = new Schema({
 }, {timestamps: true}) 
 
 // Crear un índice compuesto para que 'nameTeam' sea único solo dentro del mismo 'tournament'
-TeamSchema.index({ nameTeam: 1, tournament: 1 }, { unique: true });
+TeamSchema.index({ nameTeam: 1, tournament: 1, branchTeam: 1 }, { unique: true });
 
 const Team = mongoose.model<ITeam>('Team', TeamSchema)
 export default Team
