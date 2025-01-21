@@ -1,5 +1,8 @@
 import type { Request, Response } from 'express';
 import Tournament from '../models/Tournament';
+import Player from '../models/Player';
+import Team from '../models/Team';
+import fs from 'fs';
 
 export class TournamentController {
 
@@ -72,29 +75,35 @@ export class TournamentController {
     }
   }
 
-  static deleteTournament = async (req: Request, res: Response) => {
+  static deleteTournament = async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
     try {
-      const tournament = await Tournament.findById(id);
-
+      
+      const tournament = await Tournament.findById(id).populate('teams');
+  
       if (!tournament) {
         res.status(404).json({ message: 'Torneo no encontrado' });
         return;
       }
-
+  
       // Verificar que el usuario sea el administrador del torneo
       if (tournament.role.toString() !== req.user.id) {
         res.status(403).json({ error: 'No autorizado' });
         return;
       }
-
+  
+      const teamIds = tournament.teams.map((team: any) => team._id);
+  
+      await Player.deleteMany({ team: { $in: teamIds } });
+      await Team.deleteMany({ _id: { $in: teamIds } });
       await tournament.deleteOne();
+  
       res.status(200).send('Torneo eliminado correctamente');
     } catch (error) {
-      console.error(error);
+      console.error('Error al eliminar el torneo:', error);
       if (!res.headersSent) {
         res.status(500).json({ error: 'Error al eliminar el torneo' });
       }
     }
-  }
+  };
 }

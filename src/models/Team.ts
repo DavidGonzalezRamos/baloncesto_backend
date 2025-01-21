@@ -1,12 +1,12 @@
 import mongoose, {Schema, Document, Types, PopulatedDoc} from "mongoose";
-import { IPLayer } from "./Player";
+import { IPlayer } from "./Player";
 
 export interface ITeam extends Document  {
   nameTeam: string
   nameCoach: string
   branchTeam: string
   tournament: Types.ObjectId
-  players: PopulatedDoc<IPLayer & Document>[]
+  players: PopulatedDoc<IPlayer & Document>[]
 }
 
 export const TeamSchema: Schema = new Schema({

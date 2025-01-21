@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
-import Tournament from "../models/Tournament";
 import Team from "../models/Team";
+import Player from "../models/Player";
+import fs from 'fs';
 
 export class TeamController {
 
@@ -75,13 +76,33 @@ export class TeamController {
     }
   }
 
-  static deleteTeam = async (req: Request, res: Response)=> {
+  static deleteTeam = async (req: Request, res: Response) => {
     try {
-      req.tournament.teams = req.tournament.teams.filter(t => t.toString() !== req.team.id.toString())
-      await Promise.allSettled([req.team.deleteOne(), req.tournament.save()])
-      res.send('Equipo eliminado')
+
+      // Verificar y eliminar archivos antes de eliminar el jugador
+      const deleteFile = (filePath: string) => {
+        if (filePath && fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath); // Eliminar el archivo
+        }
+      };
+
+      // Eliminar los archivos del jugador, si existen
+      deleteFile(req.player.idCard);
+      deleteFile(req.player.photoPlayer);
+      deleteFile(req.player.schedulePlayer);
+      deleteFile(req.player.examMed);
+      // Eliminar a los jugadores asociados al equipo
+      await Player.deleteMany({ team: req.team.id });
+  
+      // Eliminar el equipo y actualizar el torneo
+      req.tournament.teams = req.tournament.teams.filter(t => t.toString() !== req.team.id.toString());
+      await Promise.allSettled([req.team.deleteOne(), req.tournament.save()]);
+  
+      res.status(200).send('Equipo eliminado correctamente');
     } catch (error) {
-      res.status(500).json({error: 'Error al obtener el equipo'})
+      console.error('Error al eliminar el equipo:', error);
+      res.status(500).json({ error: 'Error al eliminar el equipo' });
     }
-  }
+  };
+  
 }

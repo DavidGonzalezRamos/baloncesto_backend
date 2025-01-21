@@ -1,10 +1,10 @@
 import type { Request, Response, NextFunction } from "express";
-import Player, { IPLayer } from "../models/Player";
+import Player, { IPlayer } from "../models/Player";
 
 declare global {
   namespace Express {
     interface Request {
-      player: IPLayer
+      player: IPlayer
     }
   }
 }
