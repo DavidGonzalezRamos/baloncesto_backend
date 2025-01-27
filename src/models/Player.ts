@@ -18,8 +18,8 @@ export const PlayerSchema: Schema = new Schema(
   {
     name: { type: String, required: true, trim: true },
     lastName: { type: String, required: true, trim: true },
-    numberIpn: { type: Number, required: true, trim: true },
-    number: { type: Number, required: true, trim: true },
+    numberIpn: { type: Number, required: true, trim: true, unique: true },
+    number: { type: Number, required: true, trim: true, unique: true },
     curp: { type: String, required: true, trim: true, unique: true },
     position: { type: String, required: true, trim: true },
     idCard: {type: String, required: true, trim: true },

@@ -1,46 +1,89 @@
 import type { Request, Response } from "express";
-import Player from "../models/Player";
+import Player, { IPlayer } from "../models/Player";
 import fs from 'fs';
-import path from 'path';
+import Team from "../models/Team";
+import { createTeamPDF } from "../utils/pdf";
+
 
 export class PlayerController{
 
   static createPlayer = async (req: Request, res: Response) => {
+    // Función para eliminar archivos del sistema
+    const deleteFiles = (files: Express.Multer.File[] | undefined) => {
+      if (files) {
+        files.forEach((file) => {
+          if (fs.existsSync(file.path)) {
+            fs.unlinkSync(file.path); // Elimina el archivo
+          }
+        });
+      }
+    };
+
     try {
-      const existingPlayer = await Player.findOne({ curp: req.body.curp });
-      
-      if (existingPlayer) {
-        res.status(400).json({ error: 'El CURP ya está en uso por otro jugador' });
-        return;
+      // Validaciones para datos únicos
+      const existingPlayerCURP = await Player.findOne({ curp: req.body.curp });
+      const existingPlayerNumber = await Player.findOne({ number: req.body.number });
+      const existingPlayerNumberIpn = await Player.findOne({ numberIpn: req.body.numberIpn });
+
+      if (existingPlayerCURP) {
+        deleteFiles(req.files?.['idCard']);
+        deleteFiles(req.files?.['schedulePlayer']);
+        deleteFiles(req.files?.['photoPlayer']);
+        deleteFiles(req.files?.['examMed']);
+         res.status(400).json({ error: 'El CURP ya está en uso por otro jugador' });
+         return
       }
-  
-      // Afirmar que req.files es de tipo { [fieldname: string]: Express.Multer.File[] }
-      const { idCard, schedulePlayer, photoPlayer, examMed } = req.files as { 
-        [fieldname: string]: Express.Multer.File[] 
-      };
-  
+      if (existingPlayerNumber) {
+        deleteFiles(req.files?.['idCard']);
+        deleteFiles(req.files?.['schedulePlayer']);
+        deleteFiles(req.files?.['photoPlayer']);
+        deleteFiles(req.files?.['examMed']);
+         res.status(400).json({ error: 'El número de jugador ya está en uso' });
+         return
+      }
+      if (existingPlayerNumberIpn) {
+        deleteFiles(req.files?.['idCard']);
+        deleteFiles(req.files?.['schedulePlayer']);
+        deleteFiles(req.files?.['photoPlayer']);
+        deleteFiles(req.files?.['examMed']);
+         res.status(400).json({ error: 'La boleta ya está en uso' });
+         return
+      }
+
+      // Validación de archivos cargados
+      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+      const idCard = files['idCard']?.[0]?.path;
+      const schedulePlayer = files['schedulePlayer']?.[0]?.path;
+      const photoPlayer = files['photoPlayer']?.[0]?.path;
+      const examMed = files['examMed']?.[0]?.path;
+
       if (!idCard || !schedulePlayer || !photoPlayer || !examMed) {
-        res.status(400).json({ error: 'Todos los archivos son obligatorios' });
-        return
+        deleteFiles(files['idCard']);
+        deleteFiles(files['schedulePlayer']);
+        deleteFiles(files['photoPlayer']);
+        deleteFiles(files['examMed']);
+         res.status(400).json({ error: 'Todos los archivos son obligatorios' });
+         return
       }
-  
-      // Crear el jugador con los datos y las rutas de los archivos
+
+      // Preparar datos para el nuevo jugador
       const newPlayerData = {
         ...req.body,
-        idCard: idCard[0].path, // Ruta del archivo (si usas `multer` para almacenar en disco)
-        schedulePlayer: schedulePlayer[0].path,
-        photoPlayer: photoPlayer[0].path,
-        examMed: examMed[0].path,
+        idCard,
+        schedulePlayer,
+        photoPlayer,
+        examMed,
       };
-  
-      // Crear el nuevo jugador
+
       const player = new Player(newPlayerData);
       player.team = req.team.id;
-  
-      // Asociar el jugador al equipo y guardar ambos
+
+      // Asociar el jugador al equipo
       req.team.players.push(player.id);
+
+      // Guardar jugador y equipo en la base de datos
       await Promise.allSettled([player.save(), req.team.save()]);
-  
+
       res.status(201).send('Jugador creado');
     } catch (error) {
       res.status(500).json({ error: 'Error al crear el jugador' });
@@ -72,9 +115,19 @@ export class PlayerController{
   static updatePlayer = async (req: Request, res: Response) => {
     try {
       // Verificar si el CURP ya está en uso
-      const existingPlayer = await Player.findOne({ curp: req.body.curp });
-      if (existingPlayer && existingPlayer.id.toString() !== req.player.id.toString()) {
+      const existingPlayerCURP = await Player.findOne({ curp: req.body.curp });
+      if (existingPlayerCURP && existingPlayerCURP.id.toString() !== req.player.id.toString()) {
         res.status(400).json({ error: 'El CURP ya está en uso por otro jugador' });
+        return
+      }
+      const existingPlayerNumber = await Player.findOne({ number: req.body.number });
+      if (existingPlayerNumber && existingPlayerNumber.id.toString() !== req.player.id.toString()) {
+        res.status(400).json({ error: 'El número de jugador ya está en uso' });
+        return
+      }
+      const existingPlayerNumberIpn = await Player.findOne({ numberIpn: req.body.numberIpn });
+      if (existingPlayerNumberIpn && existingPlayerNumberIpn.id.toString() !== req.player.id.toString()) {
+        res.status(400).json({ error: 'La boleta ya está en uso' });
         return
       }
       
@@ -159,4 +212,48 @@ export class PlayerController{
       res.status(500).json({ error: 'Error al eliminar el jugador' });
     }
   }
+
+  static generateTeamPDF = async (req: Request, res: Response) => {
+    const { teamId } = req.params;
+
+    try {
+      // Buscar el equipo y jugadores con objetos planos
+      const team = await Team.findById(teamId).populate("players").lean();
+
+      if (!team) {
+        //console.error("Team not found:", teamId);
+        res.status(404).json({ error: "Equipo no encontrado" });
+        return;
+      }
+
+      if (!team.players || team.players.length === 0) {
+        //console.warn(`No players found for team ${teamId}`);
+        res.status(404).json({ error: "No hay jugadores para este equipo" });
+        return;
+      }
+
+      //console.log("Team data:", JSON.stringify(team, null, 2));
+
+      // Generar el PDF
+      const pdfBuffer = await createTeamPDF(team.nameTeam, team.players as IPlayer[]);
+
+      // Configurar cabeceras y enviar respuesta
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename=team-${teamId}.pdf`
+      );
+
+      res.send(pdfBuffer);
+
+      //console.log("PDF enviado con éxito.");
+    } catch (error) {
+      //console.error("Error al generar el PDF:", error);
+      res.status(500).json({
+        error: error.message || "Error al generar el PDF",
+      });
+    }
+  };
+  
+  
 }

@@ -90,4 +90,11 @@ router.delete('/:teamId/players/:playerId',
   PlayerController.deletePlayer
 )
 
+router.get("/:teamId/pdf", 
+  authenticate,
+  requireAdmin,
+  handleInputErrors,
+  PlayerController.generateTeamPDF);
+
+
 export default router;
