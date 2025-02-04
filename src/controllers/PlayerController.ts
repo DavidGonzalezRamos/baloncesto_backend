@@ -130,6 +130,12 @@ export class PlayerController{
     };
 
     try {
+      const {playerId} = req.params
+      const player = await Player.findById(playerId, req.body)
+      if(!player) {
+        res.status(404).json({error: 'Jugador no encontrado'})
+        return
+      }
       // Validar que el CURP, número o boleta no estén en uso por otro jugador
       const existingPlayerCURP = await Player.findOne({ curp: req.body.curp });
       if (existingPlayerCURP && existingPlayerCURP.id.toString() !== req.player.id.toString()) {

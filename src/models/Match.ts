@@ -10,7 +10,8 @@ export type MatchStatus = typeof matchStatus[keyof typeof matchStatus]
 export interface IMatch extends Document  {
   teamLocal: string
   teamVisitor: string
-  score: Number
+  scoreLocal: Number
+  scoreVisitor: Number
   teamWinner: string
   date: Date
   place: string
@@ -21,11 +22,12 @@ export interface IMatch extends Document  {
 export const MatchSchema: Schema = new Schema({
   teamLocal: { type: String, required: true, trim: true },
   teamVisitor: { type: String, required: true, trim: true },
-  score: { type: Number, required: true, trim: true },
+  scoreLocal: { type: Number, required: true, trim: true },
+  scoreVisitor: { type: Number, required: true, trim: true },
   teamWinner: { type: String, required: true, trim: true },
   date: { type: Date, required: true, trim: true },
   place: { type: String, required: true, trim: true },
-  tournamnet: { type: Types.ObjectId,ref: 'Tournament'
+  tournament: { type: Types.ObjectId,ref: 'Tournament'
   },
   status: { type: String, enum: Object.values(matchStatus), default: matchStatus.IN_PROGRESS }
 }, {timestamps: true})
