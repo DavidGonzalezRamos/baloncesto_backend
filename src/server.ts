@@ -7,6 +7,7 @@ import tournamentRoutes from './routes/tournamentRoutes';
 import morgan from 'morgan';
 import authRoutes from './routes/authRoutes';
 import playerRoutes from './routes/playerRoutes';
+import matchRoutes from './routes/matchRoutes';
 
 dotenv.config();
 connectDB();
@@ -24,6 +25,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/tournaments', tournamentRoutes);
 app.use('/api/players', playerRoutes);
+app.use('/api/matches', matchRoutes);
 
 
 export default app;

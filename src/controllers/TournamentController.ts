@@ -2,7 +2,6 @@ import type { Request, Response } from 'express';
 import Tournament from '../models/Tournament';
 import Player from '../models/Player';
 import Team from '../models/Team';
-import fs from 'fs';
 
 export class TournamentController {
 
