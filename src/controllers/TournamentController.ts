@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import Tournament from '../models/Tournament';
 import Player from '../models/Player';
 import Team from '../models/Team';
+import Match from '../models/Match';
 
 export class TournamentController {
 
@@ -95,6 +96,7 @@ export class TournamentController {
   
       await Player.deleteMany({ team: { $in: teamIds } });
       await Team.deleteMany({ _id: { $in: teamIds } });
+      await Match.deleteMany({ tournament: id });
       await tournament.deleteOne();
   
       res.status(200).send('Torneo eliminado correctamente');
