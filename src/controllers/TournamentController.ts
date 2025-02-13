@@ -5,7 +5,6 @@ import Team from '../models/Team';
 import Match from '../models/Match';
 import fs from 'fs';
 
-
 export class TournamentController {
 
   static createTournament = async (req: Request, res: Response) => {
@@ -104,7 +103,7 @@ export class TournamentController {
       };
 
       // Obtener todos los jugadores asociados al equipo
-      const players = await Player.find({ team: req.team.id });
+      const players = await Player.find({ team: { $in: teamIds } });
 
       // Si hay jugadores, eliminar sus archivos
       if (players.length > 0) {
