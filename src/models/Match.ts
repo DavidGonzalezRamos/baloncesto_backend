@@ -15,6 +15,7 @@ export interface IMatch extends Document  {
   teamWinner: string
   date: Date
   place: string
+  branchMatch: string
   tournament: Types.ObjectId
   status: MatchStatus
 } 
@@ -27,6 +28,7 @@ export const MatchSchema: Schema = new Schema({
   teamWinner: { type: String, required: true, trim: true },
   date: { type: Date, required: true, trim: true },
   place: { type: String, required: true, trim: true },
+  branchMatch: { type: String, required: true, trim: true },
   tournament: { type: Types.ObjectId,ref: 'Tournament'
   },
   status: { type: String, enum: Object.values(matchStatus), default: matchStatus.IN_PROGRESS }

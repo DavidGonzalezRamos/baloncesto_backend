@@ -12,6 +12,10 @@ export class MatchController {
         res.status(400).json({ error: 'El o los equipos no existen' })
         return
       }
+      if(teamLocal === teamVisitor){
+        res.status(400).json({error: 'Son el mismo equipo, eliga otro diferente'})
+        return
+      }
       const sameBranch = exisitingTeamLocal.branchTeam === exisitingTeamVisitor.branchTeam
       if (!sameBranch) {
         res.status(400).json({ error: 'Los equipos no pertenecen a la misma rama' })

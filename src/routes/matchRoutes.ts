@@ -28,6 +28,8 @@ router.post('/:tournamentId/matches',
   .isDate().notEmpty().withMessage('La fecha de inicio es requerida'),
   body('place')
     .notEmpty().withMessage('El lugar es obligatorio'),
+  body('branchMatch')
+    .notEmpty().withMessage('La rama es obligatoria'),
   handleInputErrors,
   MatchController.createMatch
 )
