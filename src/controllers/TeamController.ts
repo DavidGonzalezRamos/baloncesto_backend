@@ -86,11 +86,19 @@ export class TeamController {
         }
       };
 
-      // Eliminar los archivos del jugador, si existen
-      deleteFile(req.player.idCard);
-      deleteFile(req.player.photoPlayer);
-      deleteFile(req.player.schedulePlayer);
-      deleteFile(req.player.examMed);
+      // Obtener todos los jugadores asociados al equipo
+      const players = await Player.find({ team: req.team.id });
+
+      // Si hay jugadores, eliminar sus archivos
+      if (players.length > 0) {
+        players.forEach(player => {
+          deleteFile(player.idCard);
+          deleteFile(player.photoPlayer);
+          deleteFile(player.schedulePlayer);
+          deleteFile(player.examMed);
+        });
+      }
+
       // Eliminar a los jugadores asociados al equipo
       await Player.deleteMany({ team: req.team.id });
   

@@ -3,6 +3,8 @@ import Tournament from '../models/Tournament';
 import Player from '../models/Player';
 import Team from '../models/Team';
 import Match from '../models/Match';
+import fs from 'fs';
+
 
 export class TournamentController {
 
@@ -94,6 +96,25 @@ export class TournamentController {
   
       const teamIds = tournament.teams.map((team: any) => team._id);
   
+      // Verificar y eliminar archivos antes de eliminar el jugador
+      const deleteFile = (filePath: string) => {
+        if (filePath && fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath); // Eliminar el archivo
+        }
+      };
+
+      // Obtener todos los jugadores asociados al equipo
+      const players = await Player.find({ team: req.team.id });
+
+      // Si hay jugadores, eliminar sus archivos
+      if (players.length > 0) {
+        players.forEach(player => {
+          deleteFile(player.idCard);
+          deleteFile(player.photoPlayer);
+          deleteFile(player.schedulePlayer);
+          deleteFile(player.examMed);
+        });
+      }
       await Player.deleteMany({ team: { $in: teamIds } });
       await Team.deleteMany({ _id: { $in: teamIds } });
       await Match.deleteMany({ tournament: id });
